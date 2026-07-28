@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:latest
+    container_name: multimodal_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  # Backend Processing API Service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: multimodal_server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/multimodal_studio
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - MAX_VIDEO_DURATION_SECONDS=29
+    depends_on:
+      - mongodb
+    restart: always
+
+volumes:
+  mongo_data:
